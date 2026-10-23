@@ -172,15 +172,6 @@ export default function App() {
                   </span>
                 </div>
               </div>
-              <div className="player-strip">
-                <span className="play-dot">
-                  <PlayIcon />
-                </span>
-                <span className="track">
-                  <span className="track-fill" />
-                </span>
-                <span className="reciter">Al-Fatihah · 1:5</span>
-              </div>
             </div>
           </div>
         </section>
