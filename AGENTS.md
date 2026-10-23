@@ -29,9 +29,10 @@ Rules that come straight from the app and apply here too:
 ## Commands
 
 - Install deps: `npm install` (once; `node_modules/` is gitignored)
-- Dev server: `npm run dev` (Vite, http://localhost:5173). Never port 5000, the app uses it.
+- Dev server: `npm run dev` (Vite, http://localhost:5173). Never port 5000, the app uses it. This is what you start when the user asks to see the site: Vite compiles the TSX in memory and hot reloads.
 - Build: `npm run build` (runs `tsc -b` for a type check, then `vite build` into `dist/`). This is the check; there is no test suite or linter config yet.
 - Preview a build: `npm run preview` (serves `dist/` on port 4173)
+- Static server, screenshots only: `cd dist && python3 -m http.server 8092 --bind 127.0.0.1`. The `cd dist` is not optional, see gotcha 14.
 - Add a shadcn or gradients.sh component: `npx shadcn@latest add <registry url>`. It writes files into `src/components` / `src/lib` from `components.json`, so run it from the repo root.
 - Look at your work: this machine can shoot headless screenshots and the `read` tool displays images, so iterate visually instead of guessing. Build, serve `dist/` with `python3 -m http.server 8092 --bind 127.0.0.1` from inside `dist/`, then `firefox --headless --no-remote -profile /tmp/ffprof --window-size=1440,4600 --screenshot out.png http://127.0.0.1:8092/`. Use a tall window for a full-page shot (about 4600px for the desktop page, 3400px at 390 wide for mobile), downscale with `magick`, and `read` the PNG. Crop mobile shots into slices, they are too tall to read whole.
 
@@ -68,6 +69,7 @@ The app repo's task board has a matching entry, so changes that affect both (new
 11. **The feature grid has a breakpoint specificity trap.** `.feat-grid` is 1 column, 2 at 640px, 3 at 980px, and the `:nth-child` padding rules for the 2-column and 3-column layouts overlap. The 980px block resets `.feat:nth-child(odd)` padding on purpose. When touching the grid, check all three widths visually.
 12. **The root `tsconfig.json` carries the `@` alias on purpose.** It is a solution file (empty `files`, only project references), and it also holds `compilerOptions.paths` because the shadcn CLI resolves aliases from the root tsconfig. Without it, `npx shadcn add` silently writes files into a literal `@/` directory at the repo root. If you ever see a folder named `@`, delete it and re-run the add.
 13. **The gradient engine is code split on purpose.** Each gradient kind is its own chunk in `dist/`, so only the kinds a page uses get downloaded. Do not import the engine barrel from a hot path just to read a type; import types with `import type`.
+14. **A blank page on a local port means you are serving the wrong thing.** The repo root `index.html` is a Vite source entry (`<script type="module" src="/src/main.tsx">`), not a runnable page: if you start `python3 -m http.server <port>` from the repo root, the browser receives raw uncompiled `.tsx`, refuses to execute it as a module, and renders an empty `<div id="root">`. This is exactly what a previous session did when the user asked to start the web server, and the user saw a blank page. The two real servers are `npm run dev` (port 5173, compiles in memory, hot reloads) and `npm run preview` (port 4173, serves `dist/`); a plain static server only works when started from inside `dist/`, and only shows what was built at that moment (run `npm run build` first if `src/` changed). **Before telling the user a URL, load it yourself** and confirm content renders, a screenshot is the cheapest check. If the user reports a blank page, check which process holds the port (`ss -tlnp | grep <port>`, then `readlink /proc/<pid>/cwd`) and kill it before restarting correctly.
 
 ## File Map
 
