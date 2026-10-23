@@ -22,6 +22,7 @@ const MESH_COLORS: [string, string, ...string[]] = [
 ]
 
 const NAV = [
+  { href: '#guidance', label: 'Guidance' },
   { href: '#read', label: 'Read' },
   { href: '#listen', label: 'Mission' },
   { href: '#download', label: 'Download' },
@@ -180,6 +181,38 @@ export default function App() {
                 </span>
                 <span className="reciter">Al-Fatihah · 1:5</span>
               </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="guidance" className="rule">
+          <div className="shell section">
+            <span className="eyebrow eyebrow-gold">The Quran and Sunnah</span>
+            <h2 className="display-sm stack measure">
+              A world transformed by revealed guidance
+            </h2>
+            <div className="stack-lg measure">
+              <p className="lede">
+                The Quran is the word of Allah, revealed to guide humanity to truth,
+                justice, and mercy. Alongside it, the Sunnah of the Prophet Muhammad
+                (peace be upon him) explains and brings that guidance to life.
+              </p>
+              <p className="prose-soft">
+                Our goal is to help spread the Quran and Sunnah in English and in Tamil,
+                so more people can read, understand, and act upon this guidance in the
+                language they think in.
+              </p>
+              <p className="prose-soft" lang="ta">
+                அல்லாஹ்வின் வார்த்தையான குர்ஆன் மனிதகுலத்தை உண்மை, நீதி மற்றும் கருணைக்கு
+                அழைத்துச் செல்ல அருளப்பட்ட வழிகாட்டுதல் ஆகும். அதன் அருகில், நபி
+                முஹம்மது (ஸல்லல்லாஹு அலைஹி வஸல்லம்) அவர்களின் ஸுன்னத் அந்த
+                வழிகாட்டுதலை விளக்கி, நடைமுறையில் கொண்டு வருகிறது.
+              </p>
+              <p className="prose-soft" lang="ta">
+                ஆங்கிலத்திலும் தமிழிலும் குர்ஆனையும் ஸுன்னத்தையும் பரப்புவதுதான் எங்கள்
+                நோக்கம். அதனால் அதிகமானோர் தங்கள் மனதில் நினைக்கும் மொழியில் இதைப்
+                படித்து, புரிந்து கொண்டு, அதன்படி நடக்க முடியும்.
+              </p>
             </div>
           </div>
         </section>
