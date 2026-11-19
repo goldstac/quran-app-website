@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import {
   ArrowIcon,
   BookIcon,
@@ -6,13 +7,25 @@ import {
   KeyboardIcon,
   LanguagesIcon,
   LibraryIcon,
-  PlayIcon,
 } from '@/components/icons'
 import { MeshGradient } from '@/components/mesh-gradient'
 
 const LOGO = 'https://raw.githubusercontent.com/goldstac/quran/main/app_logo.png'
 const REPO = 'https://github.com/goldstac/quran'
 const RELEASES = 'https://github.com/goldstac/quran/releases'
+const RELEASES_API = 'https://api.github.com/repos/goldstac/quran/releases?per_page=10'
+
+type ReleaseAsset = {
+  name: string
+  browser_download_url: string
+}
+
+type GithubRelease = {
+  tag_name: string
+  created_at: string
+  published_at: string | null
+  assets: ReleaseAsset[]
+}
 
 const MESH_COLORS: [string, string, ...string[]] = [
   '#c6a15b',
@@ -66,20 +79,68 @@ const DOWNLOADS = [
     os: 'Linux',
     body: 'One AppImage, runs on any modern distro.',
     meta: 'Get the AppImage',
+    match: (name: string) => /\.AppImage$/i.test(name) || /\.deb$/i.test(name),
   },
   {
     os: 'macOS',
     body: 'The installer for Apple silicon and Intel.',
     meta: 'Get the installer',
+    match: (name: string) => /\.dmg$/i.test(name),
   },
   {
     os: 'Windows',
     body: 'The setup installer for Windows 10 and 11.',
     meta: 'Get the installer',
+    match: (name: string) => /\.(exe|msi)$/i.test(name),
+  },
+  {
+    os: 'Android',
+    body: 'The signed universal APK for phones and tablets.',
+    meta: 'Get the APK',
+    match: (name: string) => /\.apk$/i.test(name),
   },
 ]
 
+function useNewestRelease() {
+  const [release, setRelease] = useState<GithubRelease | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    let active = true
+    fetch(RELEASES_API, {
+      headers: { Accept: 'application/vnd.github+json' },
+    })
+      .then((response) => {
+        if (!response.ok) throw new Error(`GitHub returned ${response.status}`)
+        return response.json() as Promise<GithubRelease[]>
+      })
+      .then((releases) => {
+        if (!active) return
+        const usable = releases.filter((item) => item.assets?.length)
+        usable.sort(
+          (a, b) =>
+            Date.parse(b.published_at || b.created_at) -
+            Date.parse(a.published_at || a.created_at),
+        )
+        setRelease(usable[0] ?? null)
+      })
+      .catch(() => {
+        if (active) setRelease(null)
+      })
+      .finally(() => {
+        if (active) setLoading(false)
+      })
+    return () => {
+      active = false
+    }
+  }, [])
+
+  return { release, loading }
+}
+
 export default function App() {
+  const { release, loading } = useNewestRelease()
+
   return (
     <div className="relative min-h-screen overflow-x-hidden">
       <div className="hero-mesh">
@@ -259,20 +320,42 @@ export default function App() {
             Every build comes straight from the app's own releases. Python 3.11
             and yt-dlp handle the rest.
           </p>
+          <p className="prose-soft note-tight">
+            {loading
+              ? 'Finding the newest release...'
+              : release
+                ? `Direct downloads from ${release.tag_name}.`
+                : 'Release lookup is unavailable, so the buttons open GitHub releases.'}
+          </p>
           <div className="dl-grid stack-lg">
-            {DOWNLOADS.map((item) => (
-              <a key={item.os} href={RELEASES} className="dl-card">
-                <span className="feat-ico">
-                  <DownloadIcon />
-                </span>
-                <h3>{item.os}</h3>
-                <p>{item.body}</p>
-                <span className="dl-meta">
-                  {item.meta}
-                  <ArrowIcon />
-                </span>
-              </a>
-            ))}
+            {DOWNLOADS.map((item) => {
+              const asset = release?.assets.find((candidate) =>
+                item.match(candidate.name),
+              )
+              return (
+                <a
+                  key={item.os}
+                  href={asset?.browser_download_url ?? RELEASES}
+                  download={asset?.name}
+                  className="dl-card"
+                  aria-label={
+                    asset
+                      ? `Download ${item.os} ${release?.tag_name}`
+                      : `See ${item.os} builds on GitHub`
+                  }
+                >
+                  <span className="feat-ico">
+                    <DownloadIcon />
+                  </span>
+                  <h3>{item.os}</h3>
+                  <p>{item.body}</p>
+                  <span className="dl-meta">
+                    {asset ? `${item.meta} · ${release?.tag_name}` : item.meta}
+                    <ArrowIcon />
+                  </span>
+                </a>
+              )
+            })}
           </div>
           <p className="prose-soft note-tight">
             Prefer to build it yourself?{' '}
