@@ -12,7 +12,30 @@ The app and the site each get their own chat session: the app session owns `nash
 
 ## Medium priority
 
-- [ ] Download buttons that read the app's real releases instead of hardcoding them. The app publishes Linux AppImage, macOS, and Windows installers on [goldstac/quran/releases](https://github.com/goldstac/quran/releases), tagged `v1.2.x`, so the site should link the newest non prerelease tag and fall back to a plain releases link if that lookup fails. No version numbers baked into the markup.
+- [ ] Security hardening to mention when v1.2.1 ships (landed on the app's
+  `development`, not yet in a tagged release): a full security audit of the
+  app was followed by 12 fixes in separate commits. The headline ones for
+  copy: the app now listens on 127.0.0.1 only and refuses any cross-origin
+  request (it used to be reachable from other devices on your network and
+  from any website), it serves a strict content security policy, the
+  self-updater checks GitHub's published checksum before running a
+  download, and the release CI pins every third-party action to an exact
+  commit. No UI or feature changed, so the feature list stays as is; this
+  is release-notes material, and it also backs up the site's "nothing
+  phones home" line harder (the app now talks to nobody on your network).
+  Full details live in the app repo's task-board.md, Done entry dated
+  Oct 26.
+
+- [ ] App release note for copy: `v1.2.1-pre-alpha.2` shipped Oct 25 as a
+  pre-release (latest stable is still v1.2.0; the site now picks the newest
+  release including prereleases, so it follows alpha builds too). Worth taking
+  for the feature list once it is in the README: imported local nasheeds
+  now show their embedded cover art (track rows, player bar, media
+  session), and local import failures show a real reason instead of a
+  generic one. Android also crossed from "planned" to "shipped": pre-alpha
+  releases now carry a universal APK, sideload-only, with an open install
+  issue on at least one device (see the app repo board). The site now has
+  an Android card that downloads the APK directly.
 
 - [ ] Screenshots of the real app, taken from a real run, not mockups. Need at least the player with the search results, the library, and the Quran reading view, at a consistent window size, plus the logo at the sizes a browser tab and a share card want.
 
@@ -29,6 +52,8 @@ The app and the site each get their own chat session: the app session owns `nash
 - [ ] Google Fonts is the one third party request. Worth deciding whether to self host Geist, Newsreader, Noto Naskh Arabic, and Noto Sans Tamil in `public/` so the site talks to nobody.
 
 ## Done
+
+- [x] Download buttons now start a direct download of the newest release's installer asset from GitHub, instead of opening the releases page. Implemented in `src/App.tsx`: the page fetches GitHub's release list on load, filters to releases with assets, sorts by publish date and picks the newest (prereleases included, so `v1.2.1-alpha.2` shows up), then each platform card matches an asset by extension and uses its `browser_download_url`. Added an Android card for a direct APK download. Falls back to the releases page if the lookup fails. Verified: the site builds, the matching logic resolved all four URLs for `v1.2.1-alpha.2` and each returned a redirect then 200 with `Content-Disposition: attachment` (APK included), and a stale unused icon import that was breaking the build was removed. Buttons were not clicked in a live browser. Committed and pushed as `c166424`.
 
 - [x] Landing page rebuilt in the warm editorial style, modeled on [quran.org](https://quran.org) as the craft bar: cream canvas, Newsreader serif display type with Geist body, gold and teal accents, hairline rules. Sections: header, hero with the Al-Fatihah 1:5 ayah card (Arabic, Tamil, English) plus stats, a 3 by 2 feature grid, a dark mission band with the Al-Alaq 96:1 quote in Arabic and English, three download cards, and a footer. The gradients.sh `MeshGradient` is mounted behind the hero only, masked so it fades out by the end of the section. Verified with headless screenshots at 1440 and 390. Committed and pushed as `b400880`.
 
