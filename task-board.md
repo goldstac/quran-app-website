@@ -12,6 +12,18 @@ The app and the site each get their own chat session: the app session owns `nash
 
 ## Medium priority
 
+- [ ] Advertise the new app beta: the app repo cut the `v1.2.1-beta` tag on
+  2026-11-21 and its Release workflow is running (the app repo's task board
+  tracks it). When the beta lands, mention it in the site copy (landing page
+  version/claim, downloads page).
+
+- [ ] Claim changed on the app side (2026-11-20): the optional "Discord bot"
+  feature (`su!track` / `su!fm`, linking your own bot) was removed entirely
+  from the app on `development` (appends a Done entry there). Discord
+  presence still exists and is still worth advertising if the site lists it.
+  This site has no bot copy today, so there is nothing to fix; do not add a
+  bot feature to any page.
+
 - [ ] Security hardening to mention when v1.2.1 ships (landed on the app's
   `development`, not yet in a tagged release): a full security audit of the
   app was followed by 12 fixes in separate commits. The headline ones for
